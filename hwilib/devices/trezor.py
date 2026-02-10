@@ -332,8 +332,9 @@ class TrezorClient(HardwareWalletClient):
         if self.client.features.passphrase_protection and self.password is None:
             raise NoPasswordError("Passphrase protection is enabled, passphrase must be provided")
         if self.password and not self.client.features.passphrase_protection:
-            raise BadArgumentError("A passphrase was provided but passphrase protection is not enabled on the device. "
-                                   "Enable passphrase protection on the device first using 'togglepassphrase'.")
+            print("WARNING: A passphrase was provided but passphrase protection is not enabled on the device. "
+                  "The passphrase will be ignored and the default wallet will be used. "
+                  "Use 'togglepassphrase' to enable passphrase protection.", file=sys.stderr)
 
     def _supports_external(self) -> bool:
         if self.client.features.model == "1" and self.client.version <= (1, 10, 5):
