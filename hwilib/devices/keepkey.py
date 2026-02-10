@@ -206,6 +206,9 @@ def enumerate(password: Optional[str] = None, expert: bool = False, chain: Chain
                 raise DeviceNotReadyError('Keepkey is locked. Unlock by using \'promptpin\' and then \'sendpin\'.')
             if d_data['needs_passphrase_sent'] and password is None:
                 raise DeviceNotReadyError("Passphrase needs to be specified before the fingerprint information can be retrieved")
+            if password and not client.client.features.passphrase_protection:
+                d_data["warnings"] = [["Passphrase provided but passphrase protection is not enabled on the device. "
+                                       "The passphrase will be ignored. Use 'togglepassphrase' to enable it."]]
             if client.client.features.initialized:
                 d_data['fingerprint'] = client.get_master_fingerprint().hex()
                 d_data['needs_passphrase_sent'] = False # Passphrase is always needed for the above to have worked, so it's already sent

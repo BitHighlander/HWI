@@ -331,6 +331,9 @@ class TrezorClient(HardwareWalletClient):
             raise DeviceNotReadyError('{} is locked. Unlock by using \'promptpin\' and then \'sendpin\'.'.format(self.type))
         if self.client.features.passphrase_protection and self.password is None:
             raise NoPasswordError("Passphrase protection is enabled, passphrase must be provided")
+        if self.password and not self.client.features.passphrase_protection:
+            raise BadArgumentError("A passphrase was provided but passphrase protection is not enabled on the device. "
+                                   "Enable passphrase protection on the device first using 'togglepassphrase'.")
 
     def _supports_external(self) -> bool:
         if self.client.features.model == "1" and self.client.version <= (1, 10, 5):
@@ -887,6 +890,9 @@ def enumerate(password: Optional[str] = None, expert: bool = False, chain: Chain
                 raise DeviceNotReadyError('Trezor is locked. Unlock by using \'promptpin\' and then \'sendpin\'.')
             if d_data['needs_passphrase_sent'] and password is None:
                 d_data["warnings"] = [["Passphrase protection enabled but passphrase was not provided. Using default passphrase of the empty string (\"\")"]]
+            if password and not client.client.features.passphrase_protection:
+                d_data.setdefault("warnings", []).append(["Passphrase provided but passphrase protection is not enabled on the device. "
+                                                          "The passphrase will be ignored. Use 'togglepassphrase' to enable it."])
             if client.client.features.initialized:
                 d_data['fingerprint'] = client.get_master_fingerprint().hex()
                 d_data['needs_passphrase_sent'] = False # Passphrase is always needed for the above to have worked, so it's already sent
