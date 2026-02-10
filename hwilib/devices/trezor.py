@@ -895,7 +895,10 @@ def enumerate(password: Optional[str] = None, expert: bool = False, chain: Chain
                 d_data['code'] = DEVICE_NOT_INITIALIZED
 
         if client:
-            client.close()
+            try:
+                client.close()
+            except Exception:
+                pass
 
         results.append(d_data)
     return results
